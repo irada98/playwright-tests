@@ -1,6 +1,6 @@
 pipeline {
     agent any
-
+ 
     parameters {
         string(
             name: 'TEST_FILE',
@@ -8,21 +8,21 @@ pipeline {
             description: 'Test file or folder to run (e.g., tests, tests/authorization.spec.ts)'
         )
     }
-
+ 
     options {
         timestamps()
         disableConcurrentBuilds()
         timeout(time: 30, unit: 'MINUTES')
     }
-
+ 
     tools {
         nodejs 'NodeJS-20'
     }
-
+ 
     environment {
         BROWSER = 'chromium'
     }
-
+ 
     stages {
         stage('Cleanup') {
             steps {
@@ -36,7 +36,7 @@ pipeline {
                 }
             }
         }
-
+ 
         stage('Checkout') {
             steps {
                 script {
@@ -45,7 +45,7 @@ pipeline {
                 }
             }
         }
-
+ 
         stage('Install Dependencies') {
             steps {
                 script {
@@ -55,19 +55,19 @@ pipeline {
                 }
             }
         }
-
+ 
         stage('Run Tests') {
             steps {
                 script {
                     echo "Running Playwright tests: ${params.TEST_FILE} with ${BROWSER} browser..."
-                    sh '''
-                        npx playwright test ${TEST_FILE} --project=${BROWSER}
-                    '''
+                    sh """
+                        npx playwright test ${params.TEST_FILE} --project=${BROWSER}
+                    """
                 }
             }
         }
     }
-
+ 
     post {
         always {
             echo "Publishing Playwright HTML Report..."
@@ -82,19 +82,19 @@ pipeline {
             )
             junit 'test-results/**/*.xml'
         }
-
+ 
         failure {
             echo "Tests failed. Check the Playwright Report for details."
         }
-
+ 
         success {
             echo "All tests passed successfully!"
         }
-
+ 
         unstable {
             echo "Build is unstable. Some tests may have failed."
         }
-
+ 
         cleanup {
             deleteDir()
         }
